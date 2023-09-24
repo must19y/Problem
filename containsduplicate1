@@ -1,0 +1,83 @@
+// this solution includes the use of a hashtable
+// this is done to provide a more optimum solution
+
+
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
+// Define a structure for the hash table
+typedef struct HashNode {
+    int key;
+    struct HashNode* next;
+} HashNode;
+
+typedef struct HashTable {
+    int size;
+    HashNode** table;
+} HashTable;
+
+// Hash function
+int hash(int key, int size) {
+    return (key < 0 ? -key : key) % size;
+}
+
+// Initialize the hash table
+HashTable* initHashTable(int size) {
+    HashTable* ht = (HashTable*)malloc(sizeof(HashTable));
+    ht->size = size;
+    ht->table = (HashNode**)malloc(sizeof(HashNode*) * size);
+
+    for (int i = 0; i < size; i++) {
+        ht->table[i] = NULL;
+    }
+
+    return ht;
+}
+
+// Insert a key into the hash table
+void insert(HashTable* ht, int key) {
+    int index = hash(key, ht->size);
+    HashNode* newNode = (HashNode*)malloc(sizeof(HashNode));
+    newNode->key = key;
+    newNode->next = ht->table[index];
+    ht->table[index] = newNode;
+}
+
+// Check if a key exists in the hash table
+bool contains(HashTable* ht, int key) {
+    int index = hash(key, ht->size);
+    HashNode* current = ht->table[index];
+
+    while (current != NULL) {
+        if (current->key == key) {
+            return true;
+        }
+        current = current->next;
+    }
+
+    return false;
+}
+
+bool containsDuplicate(int* nums, int numsSize) {
+    HashTable* ht = initHashTable(numsSize * 2);
+
+    for (int i = 0; i < numsSize; i++) {
+        int num = nums[i];
+
+        // If the element is already in the hash table, it's a duplicate
+        if (contains(ht, num)) {
+            free(ht->table);
+            free(ht);
+            return true;
+        }
+
+        // Insert the element into the hash table
+        insert(ht, num);
+    }
+
+    // No duplicates found
+    free(ht->table);
+    free(ht);
+    return false;
+}
